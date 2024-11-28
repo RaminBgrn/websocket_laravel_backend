@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
-class UserController extends Controller
+class UserController extends ResponseController
 {
     public function index(){
-
+        return 'index';
     }
 
     /**
@@ -21,15 +24,27 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function register(Request $request)
     {
         $userDataValidation = $request->validate([
             'user_name' => "required|string",
             'email' => "required|email|string",
-            'password' => "required|string|confirmed",
+            'password' => "required|string",
         ]);
 
-        return response()->json($userDataValidation);
+        $uuid = Str::uuid()->toString();
+
+        $user = User::create([
+            'name' => $userDataValidation['user_name'],
+            'email' => $userDataValidation['email'],
+            'password' => Hash::make($userDataValidation['password']),
+            'uuid'=> $uuid,
+        ]);
+
+        $accessToken = $user->createToken($uuid)->plainTextToken;
+
+         return $this->successResponse(201 , $accessToken);
+
     }
 
     /**
