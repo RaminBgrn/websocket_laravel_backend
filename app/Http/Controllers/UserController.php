@@ -11,6 +11,9 @@ use Illuminate\Support\Str;
 class UserController extends ResponseController
 {
 
+    public function index(Request $request){
+        return $request->all();
+    }
 
     /**
      * Register new user in app.

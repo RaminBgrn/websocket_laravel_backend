@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class Authentication
@@ -15,9 +16,10 @@ class Authentication
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!$request->user()){
-            return response("Unauthorized" , 401);
-        }
+        return response()->json(auth()) ;
+        // if(!auth()->user()){
+        //     return response("Unauthorized" , 401);
+        // }
 
         return $next($request);
     }
