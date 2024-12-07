@@ -11,8 +11,15 @@ use Illuminate\Support\Str;
 class UserController extends ResponseController
 {
 
-    public function index(Request $request){
-        return $request->all();
+    public function getAllUsers(Request $request)
+    {
+        $allUsers = User::all()->where('uuid', "!=", $request->user()->uuid);
+        return $allUsers;
+    }
+
+    public function index(Request $request)
+    {
+        return $this->successResponse(200, $request->user());
     }
 
     /**
@@ -20,7 +27,6 @@ class UserController extends ResponseController
      */
     public function register(Request $request)
     {
-        return $request->all();
         $userDataValidation = $request->validate([
             'user_name' => "required|string",
             'email' => "required|email|string",
@@ -37,8 +43,12 @@ class UserController extends ResponseController
         ]);
 
         $accessToken = $user->createToken($uuid)->plainTextToken;
+        $newUserData = array(
+            "user" => $user,
+            "token" => $accessToken
+        );
 
-        return $this->successResponse(201, $accessToken);
+        return $this->successResponse(201, $newUserData);
     }
 
     /**
@@ -50,15 +60,15 @@ class UserController extends ResponseController
             'email' => 'email|required',
             'password' => "string|min:8",
         ]);
-        $user = User::where("email" , $userLoginValidation['email'])->get()->first();
+        $user = User::where("email", $userLoginValidation['email'])->get()->first();
 
 
-        if(empty($user)){
-            return $this->errorResponse("User not found" , 404);
+        if (empty($user)) {
+            return $this->errorResponse("User not found", 404);
         }
 
-        if(!Hash::check($userLoginValidation['password'] , $user->password)){
-            return $this->errorResponse('Unauthorized' , 403);
+        if (!Hash::check($userLoginValidation['password'], $user->password)) {
+            return $this->errorResponse('Unauthorized', 403);
         }
 
         $accessToken = $user->createToken($user->uuid)->plainTextToken;
@@ -73,5 +83,4 @@ class UserController extends ResponseController
         Auth::user()->tokens()->delete();
         return $this->successResponse(200, 'token deleted successfully');
     }
-
 }
