@@ -14,7 +14,7 @@ class UserController extends ResponseController
     public function getAllUsers(Request $request)
     {
         $allUsers = User::all()->where('uuid', "!=", $request->user()->uuid);
-        return $allUsers;
+        return $this->successResponse(200 , $allUsers);
     }
 
     public function index(Request $request)
@@ -31,6 +31,7 @@ class UserController extends ResponseController
             'user_name' => "required|string",
             'email' => "required|email|string",
             'password' => "required|string",
+            'avatar' => "required|string",
         ]);
 
         $uuid = Str::uuid()->toString();
@@ -40,6 +41,7 @@ class UserController extends ResponseController
             'email' => $userDataValidation['email'],
             'password' => Hash::make($userDataValidation['password']),
             'uuid' => $uuid,
+            'avatar' => $userDataValidation['avatar'],
         ]);
 
         $accessToken = $user->createToken($uuid)->plainTextToken;
