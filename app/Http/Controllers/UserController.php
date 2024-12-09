@@ -13,7 +13,7 @@ class UserController extends ResponseController
 
     public function getAllUsers(Request $request)
     {
-        $allUsers = User::all()->where('uuid', "!=", $request->user()->uuid);
+        $allUsers = User::where('uuid', "!=", $request->user()->uuid)->get();
         return $this->successResponse(200 , $allUsers);
     }
 
@@ -62,9 +62,7 @@ class UserController extends ResponseController
             'email' => 'email|required',
             'password' => "string|min:8",
         ]);
-        $user = User::where("email", $userLoginValidation['email'])->get()->first();
-
-
+        $user = User::where("email"  , $userLoginValidation['email'])->get()->first();
         if (empty($user)) {
             return $this->errorResponse("User not found", 404);
         }
@@ -74,7 +72,11 @@ class UserController extends ResponseController
         }
 
         $accessToken = $user->createToken($user->uuid)->plainTextToken;
-        return $this->successResponse(201, $accessToken);
+        $userData = array(
+            'user' => $user,
+            'token' => $accessToken
+        );
+        return $this->successResponse(201, $userData);
     }
 
     /**
